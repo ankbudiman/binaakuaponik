@@ -1,0 +1,594 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Bina Akuaponik</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: start screen first. Game = large diagram with drop boxes sitting beside each part,
+   parts list + notes + pump control in a side panel, cycle strip below.
+   Palette comes from the subject: tank water, leaf green, coral fish, terracotta plant baskets. */
+:root{
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  --paper:#EAF3F2; --card:#F8FCFB; --ink:#14302F; --ink-soft:#4C6967; --line:#BCD3D0;
+  --water:#46AACB; --leaf:#4FA85F; --leaf-deep:#2D7D44;
+  --fish:#F2754B; --fish-2:#F4B63B;
+  --signal:#FFD24A; --signal-wash:#FFF1BF; --on-signal:#14302F;
+  --good:#2C7A45; --good-wash:#D8F0DD; --on-good:#FFFFFF;
+  --bad:#B63A2B; --bad-wash:#FBE0DB;
+  --pipe:#D2E2E4; --glass:#E3F1F2; --tray:#E6F0E1; --basket:#E7A56A; --pump:#3B7E9C; --foam:#FFFFFF;
+  --btn:#17688A; --on-btn:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1A1B; --card:#132425; --ink:#E4F2F0; --ink-soft:#9DBAB6; --line:#2B4647;
+    --water:#3C9DBD; --leaf:#5DB86D; --leaf-deep:#8AD39A;
+    --fish:#F58B63; --fish-2:#F6C250;
+    --signal:#E8B923; --signal-wash:#3A3314; --on-signal:#14302F;
+    --good:#6CCB88; --good-wash:#173A24; --on-good:#0C1A1B;
+    --bad:#FF8F7E; --bad-wash:#3F1C18;
+    --pipe:#3A5658; --glass:#17302F; --tray:#1D3326; --basket:#C98A55; --pump:#4C97B8; --foam:#BFE6F2;
+    --btn:#6CC4E0; --on-btn:#082126;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1A1B; --card:#132425; --ink:#E4F2F0; --ink-soft:#9DBAB6; --line:#2B4647;
+  --water:#3C9DBD; --leaf:#5DB86D; --leaf-deep:#8AD39A;
+  --fish:#F58B63; --fish-2:#F6C250;
+  --signal:#E8B923; --signal-wash:#3A3314; --on-signal:#14302F;
+  --good:#6CCB88; --good-wash:#173A24; --on-good:#0C1A1B;
+  --bad:#FF8F7E; --bad-wash:#3F1C18;
+  --pipe:#3A5658; --glass:#17302F; --tray:#1D3326; --basket:#C98A55; --pump:#4C97B8; --foam:#BFE6F2;
+  --btn:#6CC4E0; --on-btn:#082126;
+  color-scheme:dark;
+}
+
+body{
+  background:var(--paper); color:var(--ink);
+  font:400 16px/1.5 var(--font-body);
+  padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+h1,h2,h3{text-wrap:balance}
+button{font-family:inherit}
+button:focus-visible{outline:3px solid var(--btn);outline-offset:3px}
+
+/* ---------- start screen ---------- */
+.start{max-width:760px;margin:0 auto;min-height:min(80svh,720px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.s-eyebrow{margin:0;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.s-title{margin:0;font:800 clamp(46px,13vw,104px)/.95 var(--font-display)}
+.s-sub{margin:0;padding:6px 22px;border-radius:999px;background:var(--ink);color:var(--card);font:800 clamp(20px,4.5vw,28px)/1.3 var(--font-display)}
+.go{margin-top:10px;font:800 clamp(26px,6vw,34px)/1.2 var(--font-display);letter-spacing:.08em;padding:14px 64px;border-radius:999px;border:3px solid var(--ink);background:var(--btn);color:var(--on-btn);box-shadow:0 5px 0 var(--ink);cursor:pointer;transition:transform .08s,box-shadow .08s}
+.go:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.s-deco{display:block;width:100%;max-width:560px;height:auto;margin-top:14px}
+.sprout{transform-box:fill-box;transform-origin:50% 100%;animation:grow .9s cubic-bezier(.3,1.4,.5,1) both;animation-delay:calc(.3s + var(--i,0)*.15s)}
+
+/* ---------- game ---------- */
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+h1.title{margin:0;font:800 clamp(32px,6vw,46px)/1.02 var(--font-display)}
+.lead{margin:8px 0 0;max-width:52ch;color:var(--ink-soft)}
+.score{display:flex;align-items:baseline;gap:6px;font:800 24px var(--font-display);white-space:nowrap}
+.score .blank{display:inline-block;min-width:2.2em;text-align:center;border-bottom:3px solid var(--ink);font-size:32px;line-height:1.1;font-variant-numeric:tabular-nums}
+.score .of{font:700 16px var(--font-body)}
+
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+.board{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px;min-width:0}
+.canvas{position:relative;container-type:inline-size}
+svg.rajah{display:block;width:100%;height:auto}
+
+/* drop boxes that sit beside each part */
+.slot{position:absolute;translate:-50% -50%;width:22.5%;box-sizing:border-box;min-height:max(2.9em,40px);padding:.35em .5em;display:flex;align-items:center;justify-content:center;gap:.3em;text-align:center;font:700 clamp(10.5px,2.3cqw,15px)/1.2 var(--font-body);color:var(--ink-soft);background:var(--card);border:2px dashed var(--ink-soft);border-radius:10px;cursor:pointer;transition:background .15s,border-color .15s}
+.slot .tick{flex:none;width:1.25em;height:1.25em;color:var(--good)}
+.slot.filled{border-style:solid;border-color:var(--good);background:var(--good-wash);color:var(--ink);cursor:default}
+.canvas.armed .slot:not(.filled){border-color:var(--ink);background:var(--signal-wash);color:var(--ink);animation:ping 1.4s ease-in-out infinite}
+.slot.over:not(.filled){border-style:solid;border-color:var(--ink);background:var(--signal);color:var(--on-signal);animation:none}
+.slot.wrong{border-color:var(--bad);background:var(--bad-wash);color:var(--ink);animation:shake .45s}
+.slot:hover:not(.filled){border-color:var(--ink)}
+
+.bench{min-width:0}
+h2{margin:0 0 10px;font:800 20px/1.2 var(--font-display)}
+.howto{margin:0 0 14px;max-width:56ch;font-size:15px;color:var(--ink-soft)}
+.cards{display:flex;flex-wrap:wrap;gap:10px;min-height:56px;margin-bottom:16px}
+.cards .empty{margin:0;align-self:center;color:var(--ink-soft)}
+.card{font:700 17px var(--font-body);padding:10px 18px;border-radius:999px;border:2px solid var(--ink);background:var(--card);color:var(--ink);box-shadow:0 3px 0 var(--ink);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .08s}
+.card:hover{transform:translateY(-1px)}
+.card.sel{background:var(--signal);color:var(--on-signal)}
+.card.dragging{opacity:.35}
+.card.ghost{position:fixed;z-index:1000;pointer-events:none;margin:0;transform:rotate(-3deg);box-shadow:0 8px 18px rgba(0,0,0,.28);cursor:grabbing}
+
+.note{min-height:6.4em;padding:12px 14px;border-radius:12px;background:var(--card);border:2px solid var(--line)}
+.note strong{font-family:var(--font-display);font-weight:800}
+.note.ok{background:var(--good-wash);border-color:var(--good)}
+.note.bad{background:var(--bad-wash);border-color:var(--bad)}
+
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-top:16px}
+.hint{margin:0;flex:1 1 200px;min-width:0;font-size:15px;color:var(--ink-soft)}
+.run{font:800 18px var(--font-display);padding:10px 24px;border-radius:999px;border:2px solid var(--ink);background:var(--btn);color:var(--on-btn);box-shadow:0 3px 0 var(--ink);cursor:pointer;transition:transform .08s,box-shadow .08s}
+.run:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.run.on{background:var(--card);color:var(--ink)}
+.run:disabled{background:var(--line);color:var(--ink-soft);border-color:var(--ink-soft);box-shadow:none;cursor:not-allowed}
+.links{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:10px}
+.link{font:700 15px var(--font-body);padding:6px 0;border:0;background:none;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+.cycle{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.cycle .sub{margin:0;max-width:70ch;color:var(--ink-soft)}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.steps li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;padding:12px;border:2px solid var(--line);border-radius:12px;transition:background .3s,border-color .3s}
+.steps li.on{background:var(--signal-wash);border-color:var(--signal)}
+.steps .n{grid-row:span 2;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--card);font:800 17px var(--font-display)}
+.steps h3{margin:0;font:800 17px/1.25 var(--font-display)}
+.steps p{margin:0;font-size:15px;color:var(--ink-soft)}
+
+/* ---------- diagram ---------- */
+.ground,.s{stroke:var(--ink);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.glass{fill:var(--glass)}
+.water{fill:var(--water);opacity:.55}
+.tray{fill:var(--tray)}
+.traywater{fill:var(--water);opacity:.6;transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(.12);transition:transform 4s ease-in-out}
+svg.filled .traywater{transform:scaleY(1)}
+.outline{fill:none;stroke:var(--ink-soft);stroke-width:2.5;stroke-dasharray:7 6}
+.outline.thick{stroke-width:9;stroke-dasharray:1 10;stroke-linecap:round}
+.part .real{opacity:.2}
+.part.built .real{opacity:1;animation:pop .5s cubic-bezier(.3,1.5,.5,1);transform-box:fill-box;transform-origin:center}
+.part.built .outline{display:none}
+.pipe-edge{fill:none;stroke:var(--ink);stroke-width:11;stroke-linejoin:round}
+.pipe{fill:none;stroke:var(--pipe);stroke-width:5.5;stroke-linejoin:round}
+.pipecap{fill:var(--pipe);stroke:var(--ink);stroke-width:2}
+.flowline{fill:none;stroke:var(--water);stroke-width:3.5;stroke-dasharray:3 9;stroke-linecap:round;opacity:0}
+svg.flow .flowline{opacity:1;animation:dash .8s linear infinite}
+.drop,.air{opacity:0}
+.drop{fill:var(--water)}
+.air{fill:none;stroke:var(--foam);stroke-width:1.5}
+svg.flow .drop,svg.flow .air{animation:fall .8s linear infinite;animation-delay:calc(var(--d,0)*.27s)}
+.ripple{fill:none;stroke:var(--foam);stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center}
+svg.flow .ripple{animation:ripple 1.1s ease-out infinite}
+.pumpbody{fill:var(--pump);stroke:var(--ink);stroke-width:2.5}
+.grille{fill:none;stroke:var(--foam);stroke-width:2;stroke-linecap:round;opacity:.7}
+.hub{fill:var(--foam);stroke:var(--ink);stroke-width:1.5}
+.blade{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round}
+.impeller{transform-box:fill-box;transform-origin:center}
+svg.flow .impeller{animation:spin .6s linear infinite}
+.basket{fill:var(--basket);stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+.root{fill:none;stroke:var(--ink-soft);stroke-width:1.8;stroke-linecap:round}
+.plant{transform-box:fill-box;transform-origin:50% 100%;transform:scale(.5);transition:transform 7s ease-out;transition-delay:calc(var(--i,0)*.5s)}
+svg.filled .plant{transform:scale(1)}
+.sway{transform-box:fill-box;transform-origin:50% 100%}
+svg.flow .sway{animation:sway 3.6s ease-in-out infinite alternate;animation-delay:calc(var(--i,0)*-.7s)}
+.stem{fill:none;stroke:var(--leaf-deep);stroke-width:3;stroke-linecap:round}
+.leaf{fill:var(--leaf);stroke:var(--leaf-deep);stroke-width:1.5}
+.swim{transform-box:fill-box;transform-origin:center;animation:swim var(--dur,10s) linear infinite;animation-delay:var(--delay,0s)}
+.lead-line{stroke:var(--ink);stroke-width:2;stroke-dasharray:5 4;fill:none}
+.lead-dot{fill:var(--ink)}
+.lead-line.on{stroke:var(--btn);stroke-width:3}
+.lead-line.ok{stroke-dasharray:none}
+.fish,.part{transition:filter .4s}
+svg[data-step="1"] .fish,
+svg[data-step="2"] #part-e,svg[data-step="2"] #part-d,
+svg[data-step="3"] #part-a,svg[data-step="3"] #part-b,
+svg[data-step="4"] #part-c{filter:drop-shadow(0 0 6px var(--signal))}
+
+@keyframes pop{from{opacity:0;transform:translateY(-10px) scale(.93)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes ping{0%,100%{box-shadow:0 0 0 0 var(--signal)}50%{box-shadow:0 0 0 5px transparent}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes dash{to{stroke-dashoffset:-12}}
+@keyframes fall{0%{transform:translateY(0);opacity:1}100%{transform:translateY(var(--fall,30px));opacity:.15}}
+@keyframes ripple{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+@keyframes swim{0%{transform:translateX(0) scaleX(1)}48%{transform:translateX(var(--dx,90px)) scaleX(1)}50%{transform:translateX(var(--dx,90px)) scaleX(-1)}98%{transform:translateX(0) scaleX(-1)}100%{transform:translateX(0) scaleX(1)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;transition-delay:0s!important}
+}
+</style>
+
+<!-- shared fish shape, kept outside the screens so both can use it -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="fishshape">
+      <path d="M-14 0 L-31 -11 Q-26 0 -31 11 Z" style="fill:var(--fc);opacity:.8"/>
+      <path d="M-3 -8 Q4 -19 11 -7 Z" style="fill:var(--fc);opacity:.8"/>
+      <ellipse rx="18" ry="9.5" style="fill:var(--fc)"/>
+      <path d="M3 -5 q-3 5 0 10" style="fill:none;stroke:#fff;stroke-width:1.4;opacity:.6"/>
+      <circle cx="10" cy="-2.5" r="2.6" style="fill:#14302F"/>
+      <circle cx="10.8" cy="-3.3" r=".9" style="fill:#fff"/>
+    </g>
+  </defs>
+</svg>
+
+<section class="start" id="start">
+  <p class="s-eyebrow">Bina Akuaponik</p>
+  <h1 class="s-title">Pertanian Bandar</h1>
+  <p class="s-sub">RBT Tahun 6</p>
+  <button class="go" id="go" type="button">MULA</button>
+  <svg class="s-deco" viewBox="0 0 600 170" aria-hidden="true">
+    <rect class="s tray" x="60" y="78" width="480" height="8" rx="3"/>
+    <g id="sprouts"></g>
+    <path class="water" d="M30 104 q22.5 -8 45 0 t45 0 t45 0 t45 0 t45 0 t45 0 t45 0 t45 0 t45 0 t45 0 t45 0 t45 0 V158 a8 8 0 0 1 -8 8 H38 a8 8 0 0 1 -8 -8 Z"/>
+    <g transform="translate(70 128)"><g class="swim" style="--dx:380px;--dur:15s;--delay:0s"><use href="#fishshape" style="--fc:var(--fish)"/></g></g>
+    <g transform="translate(150 148)"><g class="swim" style="--dx:300px;--dur:12s;--delay:-5s"><use href="#fishshape" style="--fc:var(--fish-2)"/></g></g>
+    <g transform="translate(110 118)"><g class="swim" style="--dx:340px;--dur:18s;--delay:-9s"><use href="#fishshape" style="--fc:var(--fish)"/></g></g>
+  </svg>
+</section>
+
+<div class="wrap" id="game" hidden>
+  <header class="top">
+    <div>
+      <p class="eyebrow">RBT Tahun 6 · Pertanian Bandar</p>
+      <h1 class="title">Bina Akuaponik</h1>
+      <p class="lead">Letakkan nama pada bahagian yang betul, kemudian hidupkan pam dan lihat air mengalir.</p>
+    </div>
+    <div class="score" aria-live="polite" aria-label="Markah">
+      <span aria-hidden="true">(</span><span class="blank" id="marks">0</span><span class="of">/5 markah</span><span aria-hidden="true">)</span>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section class="board" aria-label="Gambar rajah sistem akuaponik">
+      <div class="canvas" id="canvas">
+        <svg class="rajah" id="rajah" viewBox="-70 84 740 336" role="img" aria-label="Gambar rajah akuaponik: tangki ikan di bawah, palung tanaman di atas, satu pam, dan dua salur air.">
+          <line class="ground" x1="70" y1="409" x2="530" y2="409"/>
+
+          <g id="tank">
+            <rect class="s glass" x="100" y="250" width="400" height="155" rx="8"/>
+            <path class="water" d="M103 292 q25 -8 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t44 0 V398 a5 5 0 0 1 -5 5 H108 a5 5 0 0 1 -5 -5 Z"/>
+          </g>
+
+          <g class="fish">
+            <g transform="translate(205 322)"><g class="swim" style="--dx:100px;--dur:10s;--delay:0s"><use href="#fishshape" style="--fc:var(--fish)"/></g></g>
+            <g transform="translate(300 358)"><g class="swim" style="--dx:115px;--dur:12s;--delay:-4s"><use href="#fishshape" style="--fc:var(--fish-2)"/></g></g>
+            <g transform="translate(215 389)"><g class="swim" style="--dx:150px;--dur:14s;--delay:-7s"><use href="#fishshape" style="--fc:var(--fish)"/></g></g>
+          </g>
+
+          <!-- Palung tanaman -->
+          <g class="part" id="part-a">
+            <rect class="outline" x="130" y="180" width="350" height="70" rx="5"/>
+            <g class="real">
+              <rect class="s tray" x="130" y="180" width="350" height="70" rx="5"/>
+              <rect class="traywater" x="133" y="214" width="344" height="33" rx="2"/>
+            </g>
+          </g>
+
+          <!-- Raga tanaman (dibina oleh skrip) -->
+          <g class="part" id="part-b"></g>
+
+          <!-- Salur air keluar -->
+          <g class="part" id="part-c">
+            <path class="outline thick" d="M458 214 V280"/>
+            <g class="real">
+              <path class="pipe-edge" d="M458 214 V280"/>
+              <path class="pipe" d="M458 214 V280"/>
+              <rect class="pipecap" x="452" y="211" width="12" height="5" rx="2"/>
+              <path class="flowline" d="M458 216 V280"/>
+              <circle class="drop" cx="458" cy="284" r="2.4" style="--d:0;--fall:8px"/>
+              <circle class="drop" cx="458" cy="284" r="2.4" style="--d:1;--fall:8px"/>
+              <circle class="drop" cx="458" cy="284" r="2.4" style="--d:2;--fall:8px"/>
+              <ellipse class="ripple" cx="458" cy="293" rx="9" ry="2.6"/>
+            </g>
+          </g>
+
+          <!-- Salur air masuk -->
+          <g class="part" id="part-e">
+            <path class="outline thick" d="M153 356 V160 H183 V178"/>
+            <g class="real">
+              <path class="pipe-edge" d="M153 358 V160 H183 V178"/>
+              <path class="pipe" d="M153 358 V160 H183 V178"/>
+              <path class="flowline" d="M153 356 V160 H183 V176"/>
+              <circle class="drop" cx="183" cy="184" r="2.6" style="--d:0;--fall:30px"/>
+              <circle class="drop" cx="183" cy="184" r="2.6" style="--d:1;--fall:30px"/>
+              <circle class="drop" cx="183" cy="184" r="2.6" style="--d:2;--fall:30px"/>
+            </g>
+          </g>
+
+          <!-- Pam -->
+          <g class="part" id="part-d">
+            <rect class="outline" x="131" y="352" width="46" height="34" rx="6"/>
+            <g class="real">
+              <rect class="pumpbody" x="135" y="356" width="38" height="26" rx="6"/>
+              <path class="grille" d="M140 361 v16 M144 361 v16"/>
+              <g class="impeller"><circle class="hub" cx="160" cy="369" r="6.5"/><path class="blade" d="M160 364 v10 M155 369 h10"/></g>
+              <circle class="air" cx="182" cy="350" r="2.4" style="--d:0;--fall:-48px"/>
+              <circle class="air" cx="189" cy="358" r="2.4" style="--d:1;--fall:-54px"/>
+              <circle class="air" cx="180" cy="364" r="2.4" style="--d:2;--fall:-60px"/>
+            </g>
+          </g>
+
+          <g id="leads"></g>
+        </svg>
+        <!-- drop boxes are added here by the script, placed beside each part -->
+      </div>
+    </section>
+
+    <section class="bench" aria-label="Papan kerja">
+      <h2>Senarai bahagian</h2>
+      <p class="howto">Seret nama ke kotak di sebelah bahagian yang betul. Pada skrin sentuh, ketuk nama dahulu, kemudian ketuk kotak.</p>
+      <div class="cards" id="cards"></div>
+      <div class="note" id="note" role="status" aria-live="polite"></div>
+      <div class="controls">
+        <button class="run" id="run" type="button" disabled aria-describedby="runhint">Hidupkan pam</button>
+        <p class="hint" id="runhint"></p>
+      </div>
+      <div class="links">
+        <button class="link" id="reset" type="button">Mula semula</button>
+        <button class="link" id="home" type="button">Skrin utama</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="cycle" aria-labelledby="ch">
+    <h2 id="ch" style="margin:0">Kitaran akuaponik</h2>
+    <p class="sub">Akuaponik ialah cara menanam sayur dan memelihara ikan dalam satu sistem. Hidupkan pam untuk melihat kitaran ini berjalan pada gambar rajah.</p>
+    <ol class="steps" id="steps">
+      <li><span class="n">1</span><h3>Ikan membuang najis</h3><p>Najis ikan mengandungi bahan makanan untuk tumbuhan.</p></li>
+      <li><span class="n">2</span><h3>Pam menolak air ke atas</h3><p>Air tangki naik melalui salur air masuk ke palung.</p></li>
+      <li><span class="n">3</span><h3>Akar menyerap nutrien</h3><p>Pokok dalam raga mengambil makanan dan menjadikan air bersih.</p></li>
+      <li><span class="n">4</span><h3>Air bersih kembali</h3><p>Air turun melalui salur air keluar ke tangki ikan.</p></li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var VB={x:-70,y:84,w:740,h:336};
+
+var PARTS={
+  palung:{name:'Palung tanaman',clue:'Dulang besar yang diletakkan di atas tangki. Air bernutrien mengalir di dalamnya dan akar tanaman menyentuh air itu.',where:'Palung tanaman ialah dulang besar di bahagian atas, tempat tanaman tumbuh.'},
+  pam:{name:'Pam',clue:'Menyedut air dari tangki ikan dan menolaknya ke atas. Pam berada di dalam air.',where:'Pam diletakkan di dalam tangki ikan, di bawah air.'},
+  masuk:{name:'Salur air masuk',clue:'Paip yang membawa air dari pam naik ke palung tanaman.',where:'Salur air masuk ialah paip yang bermula dari pam dan naik ke palung.'},
+  raga:{name:'Raga tanaman',clue:'Bakul kecil berlubang yang memegang pokok supaya akarnya sampai ke air.',where:'Raga tanaman ialah bakul kecil yang memegang setiap pokok.'},
+  keluar:{name:'Salur air keluar',clue:'Paip yang mengalirkan air bersih dari palung turun semula ke tangki ikan.',where:'Salur air keluar ialah paip yang menghantar air dari palung kembali ke tangki.'}
+};
+/* each box sits beside its part; line = [x1,y1,x2,y2] from box edge to the part */
+var SLOTS=[
+  {key:'a',part:'palung',cx:14, cy:224,line:[97,224,133,216], aria:'dulang di bahagian atas'},
+  {key:'b',part:'raga',  cx:586,cy:150,line:[503,150,436,196],aria:'bakul tanaman'},
+  {key:'c',part:'keluar',cx:586,cy:268,line:[503,268,463,268],aria:'paip di sebelah kanan'},
+  {key:'d',part:'pam',   cx:14, cy:369,line:[97,369,137,369], aria:'kotak kecil dalam tangki'},
+  {key:'e',part:'masuk', cx:14, cy:128,line:[97,128,153,158], aria:'paip di sebelah kiri'}
+];
+var XS=[230,277,324,371,418];
+var TICK='<svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var INTRO='<strong>Mula di sini.</strong> Pilih satu nama bahagian untuk membaca fungsinya, kemudian letakkan pada kotak di sebelah bahagian yang betul.';
+
+var svg=$('#rajah'), canvas=$('#canvas'), cardsEl=$('#cards'), noteEl=$('#note');
+var runBtn=$('#run'), runHint=$('#runhint'), stepEls=document.querySelectorAll('#steps li');
+var st, step=-1, timer=null, drag=null, suppressClick=false;
+var slotEls={};
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a}
+function fresh(){return{done:{},tried:{},mistakes:0,marks:0,sel:null,flow:false,order:shuffle(Object.keys(PARTS))}}
+function builtCount(){return Object.keys(st.done).length}
+function used(id){return Object.keys(st.done).some(function(k){return st.done[k]===id})}
+function note(kind,html){noteEl.className='note'+(kind&&kind!=='info'?' '+kind:'');noteEl.innerHTML=html}
+
+/* ---- start screen ---- */
+(function(){
+  var out='';
+  [110,205,300,395,490].forEach(function(x,i){
+    out+='<g class="sprout" style="--i:'+i+'"><path class="stem" d="M'+x+' 78 V40"/>'+
+      '<ellipse class="leaf" cx="'+(x-14)+'" cy="58" rx="14" ry="6" transform="rotate(-30 '+(x-14)+' 58)"/>'+
+      '<ellipse class="leaf" cx="'+(x+14)+'" cy="50" rx="14" ry="6" transform="rotate(30 '+(x+14)+' 50)"/>'+
+      '<ellipse class="leaf" cx="'+x+'" cy="33" rx="7" ry="13"/></g>';
+  });
+  $('#sprouts').innerHTML=out;
+})();
+function showGame(on){
+  $('#start').hidden=on;
+  $('#game').hidden=!on;
+  window.scrollTo(0,0);
+}
+$('#go').addEventListener('click',function(){showGame(true)});
+$('#home').addEventListener('click',function(){showGame(false)});
+
+/* ---- diagram bits built by script ---- */
+(function buildBaskets(){
+  var g=$('#part-b'), out='', real='';
+  XS.forEach(function(x){out+='<rect class="outline" x="'+(x-18)+'" y="184" width="36" height="36" rx="4"/>'});
+  XS.forEach(function(x,i){
+    real+='<path class="root" d="M'+(x-6)+' 217 q-4 12 -2 24 M'+(x+3)+' 217 q4 10 2 21 M'+x+' 217 v26"/>'+
+      '<g class="plant" style="--i:'+i+'"><g class="sway" style="--i:'+i+'">'+
+      '<path class="stem" d="M'+x+' 192 V150"/>'+
+      '<ellipse class="leaf" cx="'+(x-14)+'" cy="170" rx="14" ry="6" transform="rotate(-30 '+(x-14)+' 170)"/>'+
+      '<ellipse class="leaf" cx="'+(x+14)+'" cy="160" rx="14" ry="6" transform="rotate(30 '+(x+14)+' 160)"/>'+
+      '<ellipse class="leaf" cx="'+x+'" cy="143" rx="7" ry="14"/></g></g>'+
+      '<path class="basket" d="M'+(x-16)+' 190 H'+(x+16)+' L'+(x+11)+' 218 H'+(x-11)+' Z"/>';
+  });
+  g.innerHTML=out+'<g class="real">'+real+'</g>';
+})();
+
+(function buildLeads(){
+  var out='';
+  SLOTS.forEach(function(s){
+    var l=s.line;
+    out+='<line class="lead-line" data-slot="'+s.key+'" x1="'+l[0]+'" y1="'+l[1]+'" x2="'+l[2]+'" y2="'+l[3]+'"/>'+
+      '<circle class="lead-dot" cx="'+l[2]+'" cy="'+l[3]+'" r="3.5"/>';
+  });
+  $('#leads').innerHTML=out;
+})();
+function setLead(key,on){var m=svg.querySelector('.lead-line[data-slot="'+key+'"]');if(m)m.classList.toggle('on',on)}
+
+(function buildSlots(){
+  SLOTS.forEach(function(s){
+    var b=document.createElement('button');
+    b.type='button'; b.className='slot'; b.dataset.slot=s.key;
+    b.style.left=((s.cx-VB.x)/VB.w*100)+'%';
+    b.style.top=((s.cy-VB.y)/VB.h*100)+'%';
+    b.addEventListener('mouseenter',function(){setLead(s.key,true)});
+    b.addEventListener('mouseleave',function(){setLead(s.key,false)});
+    b.addEventListener('focus',function(){setLead(s.key,true)});
+    b.addEventListener('blur',function(){setLead(s.key,false)});
+    b.addEventListener('click',function(){
+      if(st.done[s.key]){note('info','Kotak ini sudah diisi dengan <strong>'+PARTS[st.done[s.key]].name+'</strong>.');return}
+      if(!st.sel){note('info','Pilih satu nama bahagian dahulu, kemudian ketuk kotak di sebelah bahagian yang betul.');return}
+      tryPlace(st.sel,s.key);
+    });
+    canvas.appendChild(b); slotEls[s.key]=b;
+  });
+})();
+
+/* ---- rendering ---- */
+function renderSlots(){
+  canvas.classList.toggle('armed',!!st.sel);
+  SLOTS.forEach(function(s){
+    var el=slotEls[s.key], id=st.done[s.key];
+    el.classList.toggle('filled',!!id);
+    el.innerHTML=id?'<span>'+PARTS[id].name+'</span>'+TICK:'<span>Letak nama di sini</span>';
+    el.setAttribute('aria-label','Kotak untuk '+s.aria+': '+(id?PARTS[id].name:'kosong'));
+  });
+}
+function renderCards(){
+  var focused=document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.part:null;
+  var left=st.order.filter(function(id){return !used(id)});
+  if(!left.length){cardsEl.innerHTML='<p class="empty">Semua nama sudah diletakkan.</p>';return}
+  cardsEl.innerHTML=left.map(function(id){
+    return '<button type="button" class="card'+(st.sel===id?' sel':'')+'" data-part="'+id+'" aria-pressed="'+(st.sel===id)+'">'+PARTS[id].name+'</button>';
+  }).join('');
+  if(focused){var f=cardsEl.querySelector('[data-part="'+focused+'"]');if(f)f.focus()}
+}
+function renderBuild(){
+  SLOTS.forEach(function(s){
+    var built=!!st.done[s.key];
+    $('#part-'+s.key).classList.toggle('built',built);
+    var m=svg.querySelector('.lead-line[data-slot="'+s.key+'"]');
+    if(m)m.classList.toggle('ok',built);
+  });
+}
+function renderScore(){$('#marks').textContent=st.marks}
+function renderRun(){
+  var n=builtCount();
+  runBtn.disabled=n<5;
+  runBtn.classList.toggle('on',st.flow);
+  runBtn.textContent=st.flow?'Matikan pam':'Hidupkan pam';
+  runHint.textContent=n<5?'Siapkan semua bahagian untuk membuka butang ini ('+n+'/5).':(st.flow?'Pam hidup. Lihat air mengalir dan pokok membesar.':'Semua bahagian siap. Tekan butang untuk menghidupkan pam.');
+}
+function renderStep(){
+  svg.dataset.step=step>=0?String(step+1):'0';
+  stepEls.forEach(function(li,i){
+    li.classList.toggle('on',i===step);
+    if(i===step)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
+  });
+}
+function renderAll(){renderSlots();renderCards();renderBuild();renderScore();renderRun()}
+
+/* ---- game logic ---- */
+function select(id){
+  st.sel=st.sel===id?null:id;
+  renderCards();renderSlots();
+  if(st.sel)note('info','<strong>'+PARTS[id].name+'.</strong> '+PARTS[id].clue);
+  else note('info',INTRO);
+}
+function tryPlace(id,key){
+  var slot=SLOTS.filter(function(s){return s.key===key})[0];
+  if(st.done[key]){note('info','Kotak ini sudah diisi dengan <strong>'+PARTS[st.done[key]].name+'</strong>.');return}
+  if(slot.part===id){
+    st.done[key]=id;
+    if(!st.tried[id])st.marks++;
+    st.sel=null;
+    renderAll();
+    var n=builtCount();
+    if(n===5){
+      note('ok',st.marks===5
+        ?'<strong>Hebat!</strong> Kelima-lima bahagian betul pada percubaan pertama. Tekan Hidupkan pam.'
+        :'<strong>Siap!</strong> Markah anda '+st.marks+'/5 (salah '+st.mistakes+' kali). Tekan Hidupkan pam untuk melihat sistem berfungsi.');
+    }else{
+      note('ok','<strong>Tepat!</strong> '+PARTS[id].name+' sudah dipasang. Tinggal '+(5-n)+' bahagian lagi.');
+    }
+  }else{
+    st.tried[id]=true; st.mistakes++; st.sel=id;
+    renderCards();renderSlots();
+    var el=slotEls[key];
+    el.classList.add('wrong');
+    setTimeout(function(){el.classList.remove('wrong')},600);
+    note('bad','<strong>Belum tepat.</strong> '+PARTS[id].where+' Cuba kotak lain.');
+  }
+}
+
+function setFlow(on){
+  st.flow=on;
+  svg.classList.toggle('flow',on);
+  if(on)svg.classList.add('filled');
+  clearInterval(timer);
+  if(on){step=0;timer=setInterval(function(){step=(step+1)%4;renderStep()},3600)}else step=-1;
+  renderStep();renderRun();
+  if(on)note('ok','<strong>Pam hidup.</strong> Air naik melalui salur air masuk, mengalir di palung, dan turun semula melalui salur air keluar. Pokok akan membesar perlahan-lahan.');
+  else note('info','<strong>Pam dimatikan.</strong> Air berhenti mengalir. Tanpa pam, tanaman tidak mendapat air bernutrien yang baharu.');
+}
+runBtn.addEventListener('click',function(){if(builtCount()<5)return;setFlow(!st.flow)});
+
+function reset(){
+  clearInterval(timer);step=-1;
+  svg.classList.remove('flow','filled');
+  st=fresh();
+  renderAll();renderStep();
+  note('info',INTRO);
+}
+$('#reset').addEventListener('click',reset);
+
+/* ---- cards: tap to select, or drag onto a box ---- */
+function slotAt(x,y){var el=document.elementFromPoint(x,y);return el?el.closest('.slot'):null}
+function clearOver(){
+  Object.keys(slotEls).forEach(function(k){
+    if(slotEls[k].classList.contains('over')){slotEls[k].classList.remove('over');setLead(k,false)}
+  });
+}
+cardsEl.addEventListener('click',function(e){
+  var b=e.target.closest('.card');
+  if(!b||suppressClick)return;
+  select(b.dataset.part);
+});
+cardsEl.addEventListener('pointerdown',function(e){
+  var b=e.target.closest('.card');
+  if(!b||(e.pointerType==='mouse'&&e.button!==0))return;
+  drag={btn:b,id:b.dataset.part,x0:e.clientX,y0:e.clientY,moved:false,ghost:null,pid:e.pointerId,w:b.offsetWidth,h:b.offsetHeight};
+  try{b.setPointerCapture(e.pointerId)}catch(err){}
+});
+cardsEl.addEventListener('pointermove',function(e){
+  if(!drag||e.pointerId!==drag.pid)return;
+  if(!drag.moved){
+    if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<8)return;
+    drag.moved=true;
+    var g=drag.btn.cloneNode(true);
+    g.classList.add('ghost');g.removeAttribute('data-part');g.setAttribute('aria-hidden','true');
+    document.body.appendChild(g);drag.ghost=g;
+    drag.btn.classList.add('dragging');
+  }
+  var lift=e.pointerType==='touch'?30:0;
+  drag.ghost.style.left=(e.clientX-drag.w/2)+'px';
+  drag.ghost.style.top=(e.clientY-drag.h/2-lift)+'px';
+  var s=slotAt(e.clientX,e.clientY);
+  clearOver();
+  if(s&&!s.classList.contains('filled')){s.classList.add('over');setLead(s.dataset.slot,true)}
+});
+function endDrag(e,cancelled){
+  if(!drag||e.pointerId!==drag.pid)return;
+  var d=drag;drag=null;
+  if(d.ghost)d.ghost.remove();
+  d.btn.classList.remove('dragging');
+  clearOver();
+  if(d.moved){
+    suppressClick=true;setTimeout(function(){suppressClick=false},80);
+    if(!cancelled){
+      var s=slotAt(e.clientX,e.clientY);
+      if(s){st.sel=d.id;tryPlace(d.id,s.dataset.slot)}
+    }
+  }
+}
+cardsEl.addEventListener('pointerup',function(e){endDrag(e,false)});
+cardsEl.addEventListener('pointercancel',function(e){endDrag(e,true)});
+
+st=fresh();
+renderAll();renderStep();
+note('info',INTRO);
+})();
+</script>
+
+</body></html>
